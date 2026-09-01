@@ -187,7 +187,7 @@ B.Tech Computer Science & Engineering
 This project is created for educational and portfolio purposes.
 
 
-## 👩‍💻 Author
+##  Author
 
 **Sara Subhan**
 
