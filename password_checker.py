@@ -4,8 +4,9 @@ import re
 import random
 import string
 
-
-# ---------- COMMON PASSWORDS ----------
+# ============================================================
+# COMMON PASSWORDS
+# ============================================================
 
 COMMON_PASSWORDS = {
     "password",
@@ -20,552 +21,587 @@ COMMON_PASSWORDS = {
     "iloveyou"
 }
 
+# ============================================================
+# COLORS - NEON THEME
+# ============================================================
 
-# ---------- NEON COLORS ----------
-
-BG_COLOR = "#080814"
-PANEL_COLOR = "#111122"
-
+BG = "#090014"
+PANEL = "#12001f"
 NEON_PINK = "#ff00ff"
-NEON_BLUE = "#00eaff"
+NEON_CYAN = "#00ffff"
 NEON_GREEN = "#39ff14"
-NEON_YELLOW = "#fff700"
-NEON_ORANGE = "#ff8c00"
+NEON_YELLOW = "#ffff00"
 NEON_RED = "#ff1744"
+WHITE = "#ffffff"
+GRAY = "#b9a7c7"
 
-TEXT_COLOR = "#ffffff"
-SUBTEXT_COLOR = "#b8b8d1"
+# ============================================================
+# MAIN WINDOW
+# ============================================================
 
+root = tk.Tk()
+root.title("Neon Password Strength Checker")
 
-# ---------- FUNCTIONS ----------
+# FULL SCREEN / MAXIMIZED WINDOW
+root.state("zoomed")
 
-def check_password(event=None):
+root.configure(bg=BG)
 
-    password = entry.get()
+# ============================================================
+# WINDOW SIZE FALLBACK
+# ============================================================
+
+root.minsize(900, 600)
+
+# ============================================================
+# STYLE
+# ============================================================
+
+style = ttk.Style()
+style.theme_use("clam")
+
+style.configure(
+    "Neon.Horizontal.TProgressbar",
+    troughcolor="#1b0928",
+    background=NEON_CYAN,
+    bordercolor=NEON_CYAN,
+    lightcolor=NEON_CYAN,
+    darkcolor=NEON_CYAN,
+    thickness=18
+)
+
+# ============================================================
+# FUNCTIONS
+# ============================================================
+
+def check_password(password):
+
     score = 0
     suggestions = []
 
+    # Empty password
     if not password:
+        return 0, "NO PASSWORD", NEON_RED, ["Enter a password to check."]
 
-        strength_label.config(
-            text="STRENGTH: --",
-            fg=SUBTEXT_COLOR
-        )
-
-        progress["value"] = 0
-
-        score_label.config(
-            text="SCORE: 0 / 5"
-        )
-
-        suggestion_label.config(text="")
-
-        return
-
-
-    # ---------- COMMON PASSWORD CHECK ----------
-
-    if password.lower() in COMMON_PASSWORDS:
-
-        strength_label.config(
-            text="⚠ VERY WEAK",
-            fg=NEON_RED
-        )
-
-        progress["value"] = 0
-
-        score_label.config(
-            text="SCORE: 0 / 5",
-            fg=NEON_RED
-        )
-
-        suggestion_label.config(
-            text="⚠ COMMONLY USED PASSWORD!\nCHOOSE A MORE UNIQUE PASSWORD.",
-            fg=NEON_RED
-        )
-
-        return
-
-
-    # ---------- LENGTH ----------
-
+    # Length
     if len(password) >= 8:
-        score += 1
+        score += 20
     else:
-        suggestions.append("• Use at least 8 characters")
+        suggestions.append("Use at least 8 characters.")
 
+    if len(password) >= 12:
+        score += 10
 
-    # ---------- UPPERCASE ----------
-
-    if re.search(r"[A-Z]", password):
-        score += 1
-    else:
-        suggestions.append("• Add an uppercase letter")
-
-
-    # ---------- LOWERCASE ----------
-
+    # Lowercase
     if re.search(r"[a-z]", password):
-        score += 1
+        score += 15
     else:
-        suggestions.append("• Add a lowercase letter")
+        suggestions.append("Add lowercase letters.")
 
+    # Uppercase
+    if re.search(r"[A-Z]", password):
+        score += 15
+    else:
+        suggestions.append("Add uppercase letters.")
 
-    # ---------- NUMBER ----------
-
+    # Numbers
     if re.search(r"\d", password):
-        score += 1
+        score += 15
     else:
-        suggestions.append("• Add a number")
+        suggestions.append("Add numbers.")
 
-
-    # ---------- SPECIAL CHARACTER ----------
-
-    if re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-        score += 1
+    # Special characters
+    if re.search(r"[^A-Za-z0-9]", password):
+        score += 15
     else:
-        suggestions.append("• Add a special character")
+        suggestions.append("Add special characters.")
 
+    # Common password
+    if password.lower() in COMMON_PASSWORDS:
+        score = max(0, score - 40)
+        suggestions.append("Avoid common passwords.")
 
-    # ---------- UPDATE SCORE ----------
+    # Repeated characters
+    if re.search(r"(.)\1\1", password):
+        score = max(0, score - 10)
+        suggestions.append("Avoid repeated characters.")
 
-    progress["value"] = score
-
-    score_label.config(
-        text=f"SCORE: {score} / 5"
-    )
-
-
-    # ---------- PASSWORD STRENGTH ----------
-
-    if score <= 2:
-
-        result = "WEAK"
+    # Final strength
+    if score < 30:
+        strength = "VERY WEAK"
         color = NEON_RED
 
-    elif score <= 4:
+    elif score < 50:
+        strength = "WEAK"
+        color = "#ff6600"
 
-        result = "MEDIUM"
-        color = NEON_ORANGE
+    elif score < 70:
+        strength = "MEDIUM"
+        color = NEON_YELLOW
+
+    elif score < 90:
+        strength = "STRONG"
+        color = NEON_CYAN
 
     else:
-
-        result = "STRONG"
+        strength = "VERY STRONG"
         color = NEON_GREEN
 
+    return score, strength, color, suggestions
 
+
+def update_strength(event=None):
+
+    password = password_entry.get()
+
+    score, strength, color, suggestions = check_password(password)
+
+    # Update progress bar
+    progress["value"] = score
+
+    # Update strength text
     strength_label.config(
-        text=f"STRENGTH: {result}",
+        text=strength,
         fg=color
     )
 
+    # Update score
     score_label.config(
+        text=f"Security Score: {score}/100",
         fg=color
     )
 
+    # Update suggestions
+    suggestions_text.delete("1.0", tk.END)
 
-    # ---------- SUGGESTIONS ----------
-
-    if suggestions:
-
-        suggestion_label.config(
-            text="\n".join(suggestions),
-            fg=NEON_YELLOW
+    if not suggestions:
+        suggestions_text.insert(
+            tk.END,
+            "✓ Excellent! Your password meets all security requirements."
         )
-
     else:
+        for suggestion in suggestions:
+            suggestions_text.insert(
+                tk.END,
+                "• " + suggestion + "\n"
+            )
 
-        suggestion_label.config(
-            text="✓ EXCELLENT PASSWORD!",
-            fg=NEON_GREEN
-        )
 
+def toggle_password():
 
-# ---------- GENERATE PASSWORD ----------
+    if password_entry.cget("show") == "":
+        password_entry.config(show="•")
+        show_button.config(text="SHOW")
+    else:
+        password_entry.config(show="")
+        show_button.config(text="HIDE")
+
 
 def generate_password():
-
-    uppercase = random.choice(string.ascii_uppercase)
-    lowercase = random.choice(string.ascii_lowercase)
-    number = random.choice(string.digits)
-    special = random.choice("!@#$%^&*")
 
     characters = (
         string.ascii_letters +
         string.digits +
-        "!@#$%^&*"
+        "!@#$%^&*()_+-=[]{}"
     )
 
-    password_chars = [
-        uppercase,
-        lowercase,
-        number,
-        special
-    ]
-
-
-    # Add remaining characters
-
-    for _ in range(8):
-
-        password_chars.append(
-            random.choice(characters)
-        )
-
-
-    random.shuffle(password_chars)
-
-    password = "".join(password_chars)
-
-    entry.delete(0, tk.END)
-
-    entry.insert(
-        0,
-        password
+    password = "".join(
+        random.choice(characters)
+        for _ in range(16)
     )
 
-    check_password()
+    password_entry.delete(0, tk.END)
+    password_entry.insert(0, password)
+
+    update_strength()
 
 
-# ---------- SHOW / HIDE PASSWORD ----------
+def clear_password():
 
-def toggle_password():
-
-    if show_var.get():
-
-        entry.config(show="")
-
-    else:
-
-        entry.config(show="*")
-
-
-# ---------- COPY PASSWORD ----------
-
-def copy_password():
-
-    password = entry.get()
-
-    if password:
-
-        root.clipboard_clear()
-
-        root.clipboard_append(password)
-
-        suggestion_label.config(
-            text="✓ PASSWORD COPIED TO CLIPBOARD!",
-            fg=NEON_BLUE
-        )
-
-    else:
-
-        suggestion_label.config(
-            text="⚠ NOTHING TO COPY!",
-            fg=NEON_RED
-        )
-
-
-# ---------- CLEAR ----------
-
-def clear_fields():
-
-    entry.delete(0, tk.END)
-
-    strength_label.config(
-        text="STRENGTH: --",
-        fg=SUBTEXT_COLOR
-    )
-
-    score_label.config(
-        text="SCORE: 0 / 5",
-        fg=SUBTEXT_COLOR
-    )
-
-    suggestion_label.config(
-        text=""
-    )
+    password_entry.delete(0, tk.END)
+    suggestions_text.delete("1.0", tk.END)
 
     progress["value"] = 0
 
-    show_var.set(False)
+    strength_label.config(
+        text="NO PASSWORD",
+        fg=NEON_RED
+    )
 
-    entry.config(show="*")
+    score_label.config(
+        text="Security Score: 0/100",
+        fg=WHITE
+    )
 
-
-# ---------- WINDOW ----------
-
-root = tk.Tk()
-
-root.title("Neon Password Strength Checker")
-
-root.geometry("600x650")
-
-root.resizable(False, False)
-
-root.configure(
-    bg=BG_COLOR
-)
+    suggestions_text.insert(
+        tk.END,
+        "Enter a password to begin."
+    )
 
 
-# ---------- STYLE ----------
+# ============================================================
+# MAIN CONTAINER
+# ============================================================
 
-style = ttk.Style()
-
-style.theme_use("clam")
-
-
-# Progress Bar
-
-style.configure(
-    "Neon.Horizontal.TProgressbar",
-    troughcolor="#222238",
-    background=NEON_PINK,
-    bordercolor=BG_COLOR,
-    lightcolor=NEON_PINK,
-    darkcolor=NEON_PINK
-)
-
-
-# ---------- MAIN PANEL ----------
-
-panel = tk.Frame(
+main_frame = tk.Frame(
     root,
-    bg=PANEL_COLOR,
-    highlightbackground=NEON_BLUE,
-    highlightthickness=2
+    bg=BG
 )
 
-panel.pack(
-    padx=35,
-    pady=35,
+main_frame.pack(
     fill="both",
-    expand=True
+    expand=True,
+    padx=50,
+    pady=35
 )
 
+# ============================================================
+# TITLE
+# ============================================================
 
-# ---------- TITLE ----------
-
-title = tk.Label(
-    panel,
-    text="⚡ PASSWORD STRENGTH CHECKER ⚡",
-    font=("Arial", 20, "bold"),
-    bg=PANEL_COLOR,
-    fg=NEON_PINK
+title_label = tk.Label(
+    main_frame,
+    text="⚡ NEON PASSWORD STRENGTH CHECKER ⚡",
+    font=("Arial", 28, "bold"),
+    bg=BG,
+    fg=NEON_CYAN
 )
 
-title.pack(
-    pady=(30, 10)
+title_label.pack(
+    pady=(10, 5)
 )
 
+# ============================================================
+# SUBTITLE
+# ============================================================
 
-subtitle = tk.Label(
-    panel,
-    text="CHECK • ANALYZE • SECURE",
-    font=("Arial", 10, "bold"),
-    bg=PANEL_COLOR,
-    fg=NEON_BLUE
+subtitle_label = tk.Label(
+    main_frame,
+    text="Analyze your password security in real time",
+    font=("Arial", 13),
+    bg=BG,
+    fg=GRAY
 )
 
-subtitle.pack(
+subtitle_label.pack(
     pady=(0, 25)
 )
 
+# ============================================================
+# NEON LINE
+# ============================================================
 
-# ---------- PASSWORD ENTRY ----------
-
-entry_label = tk.Label(
-    panel,
-    text="ENTER YOUR PASSWORD",
-    font=("Arial", 10, "bold"),
-    bg=PANEL_COLOR,
-    fg=NEON_BLUE
+neon_line = tk.Frame(
+    main_frame,
+    bg=NEON_PINK,
+    height=3
 )
 
-entry_label.pack(
-    pady=(0, 8)
+neon_line.pack(
+    fill="x",
+    pady=(0, 30)
 )
 
+# ============================================================
+# PASSWORD PANEL
+# ============================================================
 
-entry = tk.Entry(
-    panel,
-    width=30,
-    show="*",
-    font=("Consolas", 15),
-    bg="#05050d",
-    fg=NEON_GREEN,
-    insertbackground=NEON_PINK,
-    relief="flat",
-    highlightbackground=NEON_BLUE,
-    highlightcolor=NEON_PINK,
+password_panel = tk.Frame(
+    main_frame,
+    bg=PANEL,
+    highlightbackground=NEON_PINK,
     highlightthickness=2
 )
 
-entry.pack(
-    ipady=10
-)
-
-entry.bind(
-    "<KeyRelease>",
-    check_password
-)
-
-
-# ---------- SHOW PASSWORD ----------
-
-show_var = tk.BooleanVar()
-
-
-show_btn = tk.Checkbutton(
-    panel,
-    text="SHOW PASSWORD",
-    variable=show_var,
-    command=toggle_password,
-    font=("Arial", 9, "bold"),
-    bg=PANEL_COLOR,
-    fg=NEON_BLUE,
-    activebackground=PANEL_COLOR,
-    activeforeground=NEON_PINK,
-    selectcolor="#222238"
-)
-
-show_btn.pack(
+password_panel.pack(
+    fill="x",
+    padx=30,
     pady=10
 )
 
+# ============================================================
+# PASSWORD LABEL
+# ============================================================
 
-# ---------- NEON BUTTON FUNCTION ----------
-
-def create_button(text, command, color):
-
-    button = tk.Button(
-        panel,
-        text=text,
-        command=command,
-        font=("Arial", 10, "bold"),
-        bg="#151526",
-        fg=color,
-        activebackground="#222238",
-        activeforeground=TEXT_COLOR,
-        relief="flat",
-        cursor="hand2",
-        width=28,
-        highlightbackground=color,
-        highlightthickness=1
-    )
-
-    button.pack(
-        pady=5
-    )
-
-    return button
-
-
-# ---------- BUTTONS ----------
-
-check_btn = create_button(
-    "⚡ CHECK STRENGTH",
-    check_password,
-    NEON_PINK
+password_label = tk.Label(
+    password_panel,
+    text="ENTER PASSWORD",
+    font=("Arial", 12, "bold"),
+    bg=PANEL,
+    fg=NEON_PINK
 )
 
-
-generate_btn = create_button(
-    "✦ GENERATE STRONG PASSWORD",
-    generate_password,
-    NEON_GREEN
+password_label.pack(
+    anchor="w",
+    padx=25,
+    pady=(20, 8)
 )
 
+# ============================================================
+# PASSWORD ENTRY FRAME
+# ============================================================
 
-copy_btn = create_button(
-    "▣ COPY PASSWORD",
-    copy_password,
-    NEON_BLUE
+entry_frame = tk.Frame(
+    password_panel,
+    bg=PANEL
 )
 
-
-clear_btn = create_button(
-    "✕ CLEAR",
-    clear_fields,
-    NEON_RED
+entry_frame.pack(
+    fill="x",
+    padx=25,
+    pady=(0, 20)
 )
 
+# ============================================================
+# PASSWORD ENTRY
+# ============================================================
 
-# ---------- STRENGTH ----------
+password_entry = tk.Entry(
+    entry_frame,
+    font=("Arial", 18),
+    bg="#050008",
+    fg=WHITE,
+    insertbackground=NEON_CYAN,
+    relief="flat",
+    show="•"
+)
+
+password_entry.pack(
+    side="left",
+    fill="x",
+    expand=True,
+    ipady=12,
+    padx=(0, 10)
+)
+
+password_entry.bind(
+    "<KeyRelease>",
+    update_strength
+)
+
+# ============================================================
+# SHOW/HIDE BUTTON
+# ============================================================
+
+show_button = tk.Button(
+    entry_frame,
+    text="SHOW",
+    command=toggle_password,
+    font=("Arial", 10, "bold"),
+    bg="#21002f",
+    fg=NEON_CYAN,
+    activebackground=NEON_CYAN,
+    activeforeground=BG,
+    relief="flat",
+    padx=20,
+    pady=12,
+    cursor="hand2"
+)
+
+show_button.pack(
+    side="right"
+)
+
+# ============================================================
+# BUTTONS
+# ============================================================
+
+button_frame = tk.Frame(
+    password_panel,
+    bg=PANEL
+)
+
+button_frame.pack(
+    pady=(0, 25)
+)
+
+generate_button = tk.Button(
+    button_frame,
+    text="⚡ GENERATE PASSWORD",
+    command=generate_password,
+    font=("Arial", 11, "bold"),
+    bg="#260033",
+    fg=NEON_GREEN,
+    activebackground=NEON_GREEN,
+    activeforeground=BG,
+    relief="flat",
+    padx=25,
+    pady=12,
+    cursor="hand2"
+)
+
+generate_button.pack(
+    side="left",
+    padx=8
+)
+
+clear_button = tk.Button(
+    button_frame,
+    text="✕ CLEAR",
+    command=clear_password,
+    font=("Arial", 11, "bold"),
+    bg="#260033",
+    fg=NEON_PINK,
+    activebackground=NEON_PINK,
+    activeforeground=BG,
+    relief="flat",
+    padx=25,
+    pady=12,
+    cursor="hand2"
+)
+
+clear_button.pack(
+    side="left",
+    padx=8
+)
+
+# ============================================================
+# RESULTS PANEL
+# ============================================================
+
+results_panel = tk.Frame(
+    main_frame,
+    bg=PANEL,
+    highlightbackground=NEON_CYAN,
+    highlightthickness=2
+)
+
+results_panel.pack(
+    fill="both",
+    expand=True,
+    padx=30,
+    pady=15
+)
+
+# ============================================================
+# STRENGTH TITLE
+# ============================================================
+
+strength_title = tk.Label(
+    results_panel,
+    text="PASSWORD STRENGTH",
+    font=("Arial", 12, "bold"),
+    bg=PANEL,
+    fg=NEON_CYAN
+)
+
+strength_title.pack(
+    pady=(25, 5)
+)
+
+# ============================================================
+# STRENGTH
+# ============================================================
 
 strength_label = tk.Label(
-    panel,
-    text="STRENGTH: --",
-    font=("Arial", 15, "bold"),
-    bg=PANEL_COLOR,
-    fg=SUBTEXT_COLOR
+    results_panel,
+    text="NO PASSWORD",
+    font=("Arial", 32, "bold"),
+    bg=PANEL,
+    fg=NEON_RED
 )
 
 strength_label.pack(
-    pady=(20, 5)
-)
-
-
-score_label = tk.Label(
-    panel,
-    text="SCORE: 0 / 5",
-    font=("Consolas", 11, "bold"),
-    bg=PANEL_COLOR,
-    fg=SUBTEXT_COLOR
-)
-
-score_label.pack(
     pady=5
 )
 
+# ============================================================
+# SCORE
+# ============================================================
 
-# ---------- PROGRESS BAR ----------
+score_label = tk.Label(
+    results_panel,
+    text="Security Score: 0/100",
+    font=("Arial", 14, "bold"),
+    bg=PANEL,
+    fg=WHITE
+)
+
+score_label.pack(
+    pady=(0, 15)
+)
+
+# ============================================================
+# PROGRESS BAR
+# ============================================================
 
 progress = ttk.Progressbar(
-    panel,
+    results_panel,
     style="Neon.Horizontal.TProgressbar",
-    length=400,
-    maximum=5,
-    mode="determinate"
+    orient="horizontal",
+    mode="determinate",
+    maximum=100
 )
 
 progress.pack(
-    pady=10
+    fill="x",
+    padx=60,
+    pady=(0, 25)
 )
 
+# ============================================================
+# SUGGESTIONS TITLE
+# ============================================================
 
-# ---------- SUGGESTIONS ----------
-
-suggestion_label = tk.Label(
-    panel,
-    text="",
-    justify="center",
-    font=("Arial", 10),
-    bg=PANEL_COLOR,
-    fg=NEON_YELLOW
+suggestions_label = tk.Label(
+    results_panel,
+    text="SECURITY ANALYSIS",
+    font=("Arial", 12, "bold"),
+    bg=PANEL,
+    fg=NEON_PINK
 )
 
-suggestion_label.pack(
-    pady=15
+suggestions_label.pack(
+    anchor="w",
+    padx=60,
+    pady=(5, 8)
 )
 
+# ============================================================
+# SUGGESTIONS TEXT
+# ============================================================
 
-# ---------- FOOTER ----------
+suggestions_text = tk.Text(
+    results_panel,
+    height=6,
+    font=("Arial", 12),
+    bg="#050008",
+    fg=WHITE,
+    insertbackground=NEON_CYAN,
+    relief="flat",
+    wrap="word"
+)
+
+suggestions_text.pack(
+    fill="both",
+    expand=True,
+    padx=60,
+    pady=(0, 25)
+)
+
+suggestions_text.insert(
+    tk.END,
+    "Enter a password to begin."
+)
+
+# ============================================================
+# FOOTER
+# ============================================================
 
 footer = tk.Label(
-    panel,
-    text="🔐 YOUR PASSWORD SECURITY MATTERS",
-    font=("Arial", 8, "bold"),
-    bg=PANEL_COLOR,
-    fg="#777799"
+    root,
+    text="🔐 Neon Password Security Tool  •  Python + Tkinter",
+    font=("Arial", 10),
+    bg=BG,
+    fg=GRAY
 )
 
 footer.pack(
-    side="bottom",
-    pady=15
+    pady=(0, 12)
 )
 
-
-# ---------- RUN ----------
+# ============================================================
+# START APPLICATION
+# ============================================================
 
 root.mainloop()
-
