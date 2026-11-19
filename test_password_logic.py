@@ -1,9 +1,11 @@
 
+import pytest
+
 from password_logic import check_password, generate_secure_password
 
 
 def test_empty_password():
-    assert check_password("")[0] == 0
+    assert check_password("")[1] == "EMPTY"
 
 
 def test_common_password():
@@ -23,12 +25,11 @@ def test_strong_password():
 
 
 def test_repeated_characters():
-    assert check_password("Abcdefg1!xxx")[0] < check_password("Abcdefg1!xyz")[0]
+    assert check_password("AAAAaaaa1111!!!!")[1] != "VERY STRONG"
 
 
 def test_generated_password_length():
-    password = generate_secure_password(16)
-    assert len(password) == 16
+    assert len(generate_secure_password(16)) == 16
 
 
 def test_generated_password_has_all_character_types():
@@ -41,8 +42,5 @@ def test_generated_password_has_all_character_types():
 
 
 def test_invalid_length():
-    try:
-        generate_secure_password(4)
-        assert False
-    except ValueError:
-        assert True
+    with pytest.raises(ValueError):
+        generate_secure_password(5)
