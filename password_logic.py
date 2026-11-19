@@ -12,9 +12,14 @@ COMMON_PASSWORDS = {
 
 def normalize_password(password):
     substitutions = str.maketrans({
-        "@": "a", "0": "o", "$": "s",
-        "1": "i", "3": "e", "4": "a",
-        "5": "s", "7": "t"
+        "@": "a",
+        "0": "o",
+        "$": "s",
+        "1": "i",
+        "3": "e",
+        "4": "a",
+        "5": "s",
+        "7": "t"
     })
 
     normalized = password.lower().translate(substitutions)
@@ -35,7 +40,7 @@ def looks_common(password):
 
 def check_password(password):
     if not password:
-        return 0, "NO PASSWORD", []
+        return 0, "EMPTY", []
 
     score = 0
     feedback = []
@@ -55,7 +60,9 @@ def check_password(password):
         else:
             feedback.append(message)
 
-    if looks_common(password):
+    common = looks_common(password)
+
+    if common:
         score = min(score, 20)
         feedback.append("Avoid common or predictable passwords.")
 
@@ -67,7 +74,9 @@ def check_password(password):
         score = max(0, score - 15)
         feedback.append("Avoid predictable sequences.")
 
-    if score >= 80:
+    if common:
+        strength = "VERY WEAK"
+    elif score >= 80:
         strength = "VERY STRONG"
     elif score >= 60:
         strength = "STRONG"
@@ -101,5 +110,6 @@ def generate_secure_password(length=16):
     )
 
     secrets.SystemRandom().shuffle(password)
+
     return "".join(password)
 
