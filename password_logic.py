@@ -12,21 +12,13 @@ COMMON_PASSWORDS = {
 
 def normalize_password(password):
     substitutions = str.maketrans({
-        "@": "a",
-        "0": "o",
-        "$": "s",
-        "1": "i",
-        "3": "e",
-        "4": "a",
-        "5": "s",
-        "7": "t"
+        "@": "a", "0": "o", "$": "s",
+        "1": "i", "3": "e", "4": "a",
+        "5": "s", "7": "t"
     })
 
-    return re.sub(
-        r"[^a-z]",
-        "",
-        password.lower().translate(substitutions)
-    )
+    normalized = password.lower().translate(substitutions)
+    return re.sub(r"[^a-z]", "", normalized)
 
 
 def looks_common(password):
@@ -43,7 +35,7 @@ def looks_common(password):
 
 def check_password(password):
     if not password:
-        return 0, "EMPTY", []
+        return 0, "NO PASSWORD", []
 
     score = 0
     feedback = []
@@ -69,7 +61,7 @@ def check_password(password):
 
     if re.search(r"(.)\1{2,}", password):
         score = max(0, score - 15)
-        feedback.append("Avoid repeating the same character.")
+        feedback.append("Avoid repeating characters.")
 
     if re.search(r"1234|2345|3456|abcd|qwer", password.lower()):
         score = max(0, score - 15)
@@ -109,10 +101,5 @@ def generate_secure_password(length=16):
     )
 
     secrets.SystemRandom().shuffle(password)
-
     return "".join(password)
 
-
-    secrets.SystemRandom().shuffle(password_characters)
-
-    return "".join(password_characters)
