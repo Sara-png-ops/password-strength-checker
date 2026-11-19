@@ -1,97 +1,84 @@
 # Password Strength Checker
 
-A modern Python-based password security application that evaluates password strength, identifies common and weak password patterns, provides security recommendations, and generates strong passwords.
-
----
+A Python-based password security application that evaluates password strength, identifies common and predictable password patterns, provides security recommendations, and generates secure passwords.
 
 ## Project Overview
 
-The Password Strength Checker is a desktop application built with Python and Tkinter. It provides users with an interactive interface for evaluating password security based on multiple criteria.
+The Password Strength Checker is a desktop application developed using Python and Tkinter. It provides an interactive interface for analyzing password security based on multiple criteria.
 
-The application analyzes passwords using character composition, length, common-password detection, and repeated-character detection. It also provides a password generator for creating stronger credentials.
+The application follows a modular structure, separating password analysis and generation logic from the graphical interface.
 
----
+It also includes an automated test suite to verify password analysis and password generation functionality.
 
 ## Features
 
-| Feature                     | Description                                                  |
-| --------------------------- | ------------------------------------------------------------ |
-| Password Strength Detection | Evaluates the overall strength of a password                 |
-| Security Score              | Provides a score based on password characteristics           |
-| Common Password Detection   | Identifies frequently used passwords                         |
-| Character Analysis          | Checks uppercase, lowercase, numbers, and special characters |
-| Password Generator          | Generates strong random passwords                            |
-| Show / Hide Password        | Allows users to safely view or hide their password           |
-| Clear Password              | Quickly removes the current password                         |
-| Security Suggestions        | Provides recommendations for improving password strength     |
-| Maximized Interface         | Application opens in a full-size window                      |
-| Neon UI                     | Modern cybersecurity-inspired graphical interface            |
-
----
+| Feature | Description |
+|---|---|
+| Password Strength Detection | Evaluates password strength using multiple criteria |
+| Security Score | Assigns a score based on password characteristics |
+| Common Password Detection | Identifies common and predictable passwords |
+| Password Normalization | Detects certain predictable passwords using character substitutions |
+| Character Analysis | Checks uppercase, lowercase, numbers, and special characters |
+| Repeated Character Detection | Identifies repeated character patterns |
+| Sequence Detection | Detects predictable sequences such as 1234 and qwer |
+| Secure Password Generator | Generates random passwords using Python's `secrets` module |
+| Show / Hide Password | Allows users to reveal or hide passwords |
+| Copy Password | Copies generated passwords |
+| Clear Password | Clears the current password |
+| Security Suggestions | Provides recommendations for improving password strength |
+| Maximized Interface | Opens the application in a maximized window |
+| Neon UI | Provides a cybersecurity-inspired graphical interface |
+| Automated Testing | Includes 9 tests using pytest |
 
 ## Password Strength Analysis
 
-The application evaluates passwords using several security factors:
+The application evaluates passwords using the following security factors:
 
-* Password length
-* Uppercase letters
-* Lowercase letters
-* Numbers
-* Special characters
-* Common password patterns
-* Repeated characters
+- Password length
+- Uppercase letters
+- Lowercase letters
+- Numbers
+- Special characters
+- Common password patterns
+- Repeated characters
+- Predictable sequences
 
-The resulting score is used to classify the password as:
+Passwords are classified into five strength levels:
 
-**Very Weak → Weak → Medium → Strong → Very Strong**
+**Very Weak → Weak → Moderate → Strong → Very Strong**
 
----
+The scoring system is a heuristic assessment and does not guarantee password security.
 
 ## Technologies Used
 
-| Technology          | Purpose                           |
-| ------------------- | --------------------------------- |
-| Python              | Core application development      |
-| Tkinter             | Graphical user interface          |
-| Regular Expressions | Password pattern validation       |
-| Random              | Secure random password generation |
-| String              | Character set generation          |
-
----
+| Technology | Purpose |
+|---|---|
+| Python | Core application development |
+| Tkinter | Graphical user interface |
+| Regular Expressions | Password pattern detection and validation |
+| Secrets | Cryptographically secure random password generation |
+| String | Character set generation |
+| Pytest | Automated testing |
 
 ## Application Interface
 
 ### Main Interface
 
-Add a screenshot of your application here.
-
-```text
-![Password Strength Checker](screenshots/main-interface.png)
-```
+![Main Interface](Screenshots/main-interface.png)
 
 ### Password Analysis
 
-Add a screenshot showing a password being analyzed.
+![Password Analysis](Screenshots/password_analysis.png)
 
-```text
-![Password Analysis](screenshots/password-analysis.png)
-```
+### Secure Password Generation
 
-### Strong Password Generation
-
-Add a screenshot showing the generated password feature.
-
-```text
-![Password Generator](screenshots/password-generator.png)
-```
-
----
+![Password Generator](Screenshots/password_generator.png)
 
 ## How to Run
 
 ### Prerequisites
 
-Make sure Python 3 is installed on your system.
+- Python 3 installed on your system.
 
 ### Clone the Repository
 
@@ -99,7 +86,7 @@ Make sure Python 3 is installed on your system.
 git clone https://github.com/Sara-png-ops/password-strength-checker.git
 ```
 
-### Open the Project
+### Open the Project Folder
 
 ```bash
 cd password-strength-checker
@@ -113,7 +100,35 @@ python password_checker.py
 
 The application will launch in a maximized window.
 
----
+## Running Automated Tests
+
+Install pytest:
+
+```bash
+python -m pip install pytest
+```
+
+Run the test suite:
+
+```bash
+python -m pytest -v
+```
+
+### Test Coverage
+
+The project includes 9 automated tests covering:
+
+1. Empty password handling
+2. Common password detection
+3. Common passwords with suffixes
+4. Predictable password detection using character substitutions
+5. Strong password evaluation
+6. Repeated character detection
+7. Generated password length
+8. Generated password character diversity
+9. Invalid password generator length
+
+**Latest verified test result: 9 passed, 0 failed.**
 
 ## Project Structure
 
@@ -121,58 +136,61 @@ The application will launch in a maximized window.
 password-strength-checker/
 │
 ├── password_checker.py
+├── password_logic.py
+├── test_password_logic.py
 ├── README.md
-└── screenshots/
-    ├── main-interface.png
-    ├── password-analysis.png
-    └── password-generator.png
+│
+└── Screenshots/
+    ├── main_interface.png
+    ├── password_analysis.png
+    └── password_generator.png
 ```
 
----
+### File Description
+
+- **password_checker.py** – Main application and Tkinter graphical interface.
+- **password_logic.py** – Password analysis, common-password detection, and secure password generation.
+- **test_password_logic.py** – Automated tests for password analysis and generation.
+- **README.md** – Project documentation.
+- **Screenshots/** – Application screenshots.
 
 ## Security Concepts Demonstrated
 
-This project demonstrates practical concepts related to password security, including:
-
-* Password complexity
-* Weak password identification
-* Common-password detection
-* Character diversity
-* Random password generation
-* Input validation
-* Basic security recommendations
-
----
+- Password complexity analysis
+- Common and weak password identification
+- Character diversity
+- Password pattern recognition
+- Secure random password generation
+- Input validation
+- Predictable sequence detection
+- Security recommendations
+- Automated software testing
+- Modular application development
 
 ## Future Improvements
 
-Possible future enhancements include:
-
-* Password entropy calculation
-* More extensive common-password databases
-* Password history analysis
-* Dark and light interface themes
-* Exporting password analysis reports
-* Additional password security rules
-* Improved accessibility
-* Packaging the application as a standalone executable
-
----
+- Password entropy calculation
+- Integration of a larger common-password database
+- Additional password security rules
+- Password history analysis
+- Dark and light interface themes
+- Exporting password analysis reports
+- Improved accessibility
+- Packaging as a standalone executable
 
 ## Learning Outcomes
 
 Through this project, I gained practical experience with:
 
-* Python GUI development
-* Tkinter widgets and layouts
-* Event-driven programming
-* Regular expressions
-* Input validation
-* Random data generation
-* User interface design
-* Git and GitHub project management
-
----
+- Python application development
+- Tkinter GUI development
+- Event-driven programming
+- Regular expressions
+- Password security concepts
+- Secure random number generation
+- Modular Python programming
+- Automated testing with pytest
+- Git and GitHub project management
 
 ## Author
 
@@ -180,16 +198,8 @@ Through this project, I gained practical experience with:
 
 B.Tech Computer Science & Engineering
 
----
+
 
 ## License
 
 This project is created for educational and portfolio purposes.
-
-
-##  Author
-
-**Sara Subhan**
-
-Built with Python 🐍 and Tkinter.
-
